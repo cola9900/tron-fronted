@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <title>钱包绑定</title>
 </head>
 <body>
@@ -12,15 +12,20 @@
   <script>
     let userWallet = null;
 
-    // 页面加载时检测 TronWeb
     window.addEventListener('load', () => {
+      console.log("页面加载完成，开始检测 TronWeb...");
+      console.log("window.tronWeb = ", window.tronWeb);
+
       if (!window.tronWeb) {
-        document.getElementById('status').innerText = "未检测到 TronWeb，请在 TokenPocket 或 TronLink 的 DApp 浏览器中打开";
+        document.getElementById('status').innerText =
+          "未检测到 TronWeb，请在 TokenPocket 或 TronLink 的 DApp 浏览器中打开";
         return;
       }
 
       // 获取当前钱包地址
       userWallet = window.tronWeb.defaultAddress.base58;
+      console.log("检测到钱包地址:", userWallet);
+
       if (!userWallet) {
         document.getElementById('status').innerText = "请先在钱包中登录账号";
       } else {
@@ -28,7 +33,7 @@
       }
     });
 
-    // 点击按钮绑定
+    // 绑定钱包按钮
     document.getElementById('bindBtn').addEventListener('click', async () => {
       if (!userWallet) {
         alert("未检测到钱包地址，请确认已登录钱包");
@@ -36,25 +41,29 @@
       }
 
       try {
+        console.log("开始向后端发送请求，钱包地址：", userWallet);
+
         const response = await fetch('http://localhost:3000/bind-wallet', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            address: userWallet, // 和后端字段对应
-            session_id: '123456' // 也可以替换为实际邀请链接的参数
+            walletAddress: userWallet,
+            session_id: '123456' // 可以替换成实际的邀请参数
           })
         });
 
         const result = await response.json();
+        console.log("后端返回：", result);
 
-        if (response.ok) {
-          alert("绑定成功！地址：" + result.address);
+        if (result.success) {
+          alert("绑定成功！");
         } else {
-          alert("绑定失败：" + result.error);
+          alert("绑定失败：" + (result.message || '未知错误'));
         }
       } catch (err) {
+        console.error("网络错误：", err);
         alert("网络错误：" + err.message);
       }
     });
