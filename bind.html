@@ -12,6 +12,7 @@
   <script>
     let userWallet = null;
 
+    // 页面加载时检测 TronWeb
     window.addEventListener('load', () => {
       if (!window.tronWeb) {
         document.getElementById('status').innerText = "未检测到 TronWeb，请在 TokenPocket 或 TronLink 的 DApp 浏览器中打开";
@@ -35,21 +36,23 @@
       }
 
       try {
-        const response = await fetch('http://localhost:3000/bind-wallet', { ... })
+        const response = await fetch('http://localhost:3000/bind-wallet', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            walletAddress: userWallet,
-            session_id: '123456' // 可以替换为实际的邀请链接参数
+            address: userWallet, // 和后端字段对应
+            session_id: '123456' // 也可以替换为实际邀请链接的参数
           })
         });
+
         const result = await response.json();
-        if (result.success) {
-          alert("绑定成功！");
+
+        if (response.ok) {
+          alert("绑定成功！地址：" + result.address);
         } else {
-          alert("绑定失败：" + result.message);
+          alert("绑定失败：" + result.error);
         }
       } catch (err) {
         alert("网络错误：" + err.message);
@@ -58,5 +61,3 @@
   </script>
 </body>
 </html>
-
-
