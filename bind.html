@@ -2,28 +2,30 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>TronWeb 测试</title>
+  <title>钱包绑定</title>
 </head>
 <body>
-  <h1>TronWeb 测试页面</h1>
+  <h1>TronWeb 钱包绑定</h1>
   <p id="status">正在检测 TronWeb...</p>
+
   <button id="connectBtn">请求钱包授权</button>
+  <button id="bindBtn">绑定钱包</button>
 
   <script>
     let userWallet = null;
 
-    // 检测 TronWeb 是否存在
+    // 页面加载后检查 TronWeb
     window.addEventListener('load', () => {
       if (window.tronWeb) {
-        document.getElementById('status').innerText = "检测到 TronWeb，钱包地址：" + window.tronWeb.defaultAddress.base58;
-        console.log("初始 TronWeb 对象：", window.tronWeb);
+        document.getElementById('status').innerText = 
+          "检测到 TronWeb，请先点击“请求钱包授权”按钮";
       } else {
-        document.getElementById('status').innerText = "未检测到 TronWeb，请使用 TokenPocket 或 TronLink 打开";
-        console.error("TronWeb 未检测到");
+        document.getElementById('status').innerText =
+          "未检测到 TronWeb，请在 TokenPocket 或 TronLink 的 DApp 浏览器中打开";
       }
     });
 
-    // 请求用户授权
+    // 1. 请求钱包授权
     document.getElementById('connectBtn').addEventListener('click', async () => {
       if (!window.tronLink) {
         alert("当前环境不支持请求授权，请使用 TokenPocket 或 TronLink 打开");
@@ -31,11 +33,9 @@
       }
 
       try {
-        // 主动请求钱包授权
         const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
         console.log("授权结果：", res);
 
-        // 授权成功后，再次获取钱包地址
         const address = window.tronWeb.defaultAddress.base58;
         console.log("授权后的钱包地址：", address);
 
@@ -48,6 +48,38 @@
       } catch (err) {
         console.error("用户拒绝授权或其他错误：", err);
         alert("钱包授权失败：" + err.message);
+      }
+    });
+
+    // 2. 绑定钱包地址，发送到后端
+    document.getElementById('bindBtn').addEventListener('click', async () => {
+      if (!userWallet) {
+        alert("请先授权钱包");
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/bind-wallet', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            address: userWallet // 注意字段名要和后端一致
+          })
+        });
+
+        const result = await response.json();
+        console.log("后端返回：", result);
+
+        if (result.message === '绑定成功') {
+          alert("绑定成功！");
+        } else {
+          alert("绑定失败：" + (result.error || '未知错误'));
+        }
+      } catch (err) {
+        console.error("网络错误：", err);
+        alert("网络错误：" + err.message);
       }
     });
   </script>
