@@ -6,7 +6,7 @@
   <title>绑定钱包</title>
 
   <!-- TronWeb.js 必须引入 -->
-  <script src="https://cdn.jsdelivr.net/npm/tronweb/dist/TronWeb.js"></script>
+  <script src="https://unpkg.com/tronweb/dist/TronWeb.js"></script>
   <!-- jQuery 可选，用于方便 DOM 操作 -->
   <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
 
@@ -59,10 +59,12 @@
     // 检测钱包是否注入
     async function init() {
       if (typeof window.tronWeb === 'undefined') {
-        console.log("TronWeb 未注入");
-        document.getElementById('walletAddress').innerText = "未检测到 Tron 钱包，请在 TokenPocket 或 TronLink 中打开此页面。";
-        return;
-      }
+  alert("未检测到 TronWeb 对象，钱包未注入！");
+  document.getElementById('walletAddress').innerText = "未检测到 Tron 钱包，请在 TokenPocket 或 TronLink 中打开此页面。";
+  return;
+} else {
+  alert("检测到 TronWeb，钱包环境已注入！");
+}
 
       try {
         // 等待钱包准备好
@@ -99,3 +101,4 @@
   </script>
 </body>
 </html>
+
