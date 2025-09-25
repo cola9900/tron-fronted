@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<script>
+  window.addEventListener('load', () => {
+    console.log("调试输出 window.tronWeb = ", window.tronWeb);
+
+    if (!window.tronWeb) {
+      alert("未检测到 TronWeb，请确认在 TokenPocket DApp 浏览器中打开！");
+      return;
+    }
+
+    alert("TronWeb 已检测到！");
+  });
+</script>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -73,3 +85,4 @@
   </script>
 </body>
 </html>
+
