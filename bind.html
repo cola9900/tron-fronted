@@ -2,26 +2,45 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>TronWeb 测试</title>
+  <title>TokenPocket 钱包检测</title>
 </head>
 <body>
-  <h1>TronWeb 测试页面</h1>
+  <h2>TokenPocket 钱包测试</h2>
   <p id="status">正在检测...</p>
+  <button onclick="requestAccount()">请求钱包授权</button>
 
   <script>
-    window.addEventListener('load', () => {
-      const status = document.getElementById('status');
+    async function requestAccount() {
+      if (window.tronLink) {
+        try {
+          const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
+          console.log("授权结果:", res);
+          alert("钱包授权成功！");
+        } catch (err) {
+          console.error("用户拒绝授权或出错:", err);
+          alert("钱包授权失败！");
+        }
+      } else {
+        alert("当前环境不支持请求钱包授权！");
+      }
+    }
 
+    window.addEventListener('load', async () => {
       if (!window.tronWeb) {
-        status.innerText = "未检测到 TronWeb，请在 TokenPocket 或 TronLink DApp 浏览器中打开";
-        console.log("window.tronWeb = ", window.tronWeb);
+        document.getElementById('status').innerText = "未检测到 TronWeb，请在 TokenPocket DApp 浏览器中打开";
         return;
       }
 
-      console.log("TronWeb 对象：", window.tronWeb);
-      console.log("默认地址：", window.tronWeb.defaultAddress);
+      console.log("TronWeb 已检测到:", window.tronWeb);
 
-      status.innerText = "检测到 TronWeb，钱包地址：" + window.tronWeb.defaultAddress.base58;
+      const walletInfo = window.tronWeb.defaultAddress;
+      console.log("钱包信息:", walletInfo);
+
+      if (!walletInfo || !walletInfo.base58) {
+        document.getElementById('status').innerText = "检测到 TronWeb，但未获取到钱包地址，请点击授权按钮";
+      } else {
+        document.getElementById('status').innerText = "钱包地址：" + walletInfo.base58;
+      }
     });
   </script>
 </body>
