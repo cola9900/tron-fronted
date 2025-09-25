@@ -1,88 +1,28 @@
 <!DOCTYPE html>
-<script>
-  window.addEventListener('load', () => {
-    console.log("调试输出 window.tronWeb = ", window.tronWeb);
-
-    if (!window.tronWeb) {
-      alert("未检测到 TronWeb，请确认在 TokenPocket DApp 浏览器中打开！");
-      return;
-    }
-
-    alert("TronWeb 已检测到！");
-  });
-</script>
-<html lang="zh-CN">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>钱包绑定</title>
+  <title>TronWeb 测试</title>
 </head>
 <body>
-  <h2>钱包绑定</h2>
-  <button id="bindBtn">绑定钱包</button>
-  <p id="status"></p>
+  <h1>TronWeb 测试页面</h1>
+  <p id="status">正在检测...</p>
 
   <script>
-    let userWallet = null;
-
-    // 页面加载后检测 TronWeb
     window.addEventListener('load', () => {
-      console.log("页面加载完成，开始检测 TronWeb...");
-      console.log("window.tronWeb = ", window.tronWeb);
+      const status = document.getElementById('status');
 
       if (!window.tronWeb) {
-        document.getElementById('status').innerText =
-          "未检测到 TronWeb，请在 TokenPocket 或 TronLink 的 DApp 浏览器中打开";
+        status.innerText = "未检测到 TronWeb，请在 TokenPocket 或 TronLink DApp 浏览器中打开";
+        console.log("window.tronWeb = ", window.tronWeb);
         return;
       }
 
-      // 获取当前钱包地址
-      userWallet = window.tronWeb.defaultAddress.base58;
-      console.log("检测到钱包地址:", userWallet);
+      console.log("TronWeb 对象：", window.tronWeb);
+      console.log("默认地址：", window.tronWeb.defaultAddress);
 
-      if (!userWallet) {
-        document.getElementById('status').innerText = "请先在钱包中登录账号";
-      } else {
-        document.getElementById('status').innerText = "检测到钱包地址：" + userWallet;
-      }
-    });
-
-    // 点击绑定钱包按钮
-    document.getElementById('bindBtn').addEventListener('click', async () => {
-      if (!userWallet) {
-        alert("未检测到钱包地址，请确认已登录钱包");
-        return;
-      }
-
-      try {
-        console.log("开始向后端发送请求，钱包地址：", userWallet);
-
-        // ⚠️ 注意：如果在手机上访问，localhost 无法使用
-        // 必须把 localhost 改成电脑的局域网 IP，比如 192.168.1.100
-        const response = await fetch('http://192.168.1.100:3000/bind-wallet', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            address: userWallet,    // ✅ 和后端字段保持一致
-            session_id: '123456'    // 邀请参数，可自定义
-          })
-        });
-
-        const result = await response.json();
-        console.log("后端返回：", result);
-
-        if (result.message === '绑定成功') {
-          alert("绑定成功！");
-        } else {
-          alert("绑定失败：" + (result.message || '未知错误'));
-        }
-      } catch (err) {
-        console.error("网络错误：", err);
-        alert("网络错误：" + err.message);
-      }
+      status.innerText = "检测到 TronWeb，钱包地址：" + window.tronWeb.defaultAddress.base58;
     });
   </script>
 </body>
 </html>
-
