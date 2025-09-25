@@ -5,77 +5,55 @@
   <title>钱包绑定</title>
 </head>
 <body>
-  <h1>TronWeb 钱包绑定</h1>
-  <p id="status">正在检测 TronWeb...</p>
-
-  <button id="connectBtn">请求钱包授权</button>
+  <h2>TronWeb 钱包绑定</h2>
   <button id="bindBtn">绑定钱包</button>
+  <p id="status"></p>
 
   <script>
     let userWallet = null;
 
-    // 页面加载后检查 TronWeb
-    window.addEventListener('load', () => {
-      if (window.tronWeb) {
-        document.getElementById('status').innerText = 
-          "检测到 TronWeb，请先点击“请求钱包授权”按钮";
-      } else {
-        document.getElementById('status').innerText =
-          "未检测到 TronWeb，请在 TokenPocket 或 TronLink 的 DApp 浏览器中打开";
-      }
-    });
-
-    // 1. 请求钱包授权
-    document.getElementById('connectBtn').addEventListener('click', async () => {
-      if (!window.tronLink) {
-        alert("当前环境不支持请求授权，请使用 TokenPocket 或 TronLink 打开");
+    // 页面加载时，检测 TronLink 或 TokenPocket 是否注入 tronWeb
+    window.addEventListener('load', async () => {
+      console.log("页面加载完成，开始检测 TronWeb...");
+      if (!window.tronWeb || !window.tronWeb.defaultAddress.base58) {
+        document.getElementById('status').innerText = "未检测到 TronWeb，请在 TokenPocket 或 TronLink 中打开";
         return;
       }
 
-      try {
-        const res = await window.tronLink.request({ method: 'tron_requestAccounts' });
-        console.log("授权结果：", res);
-
-        const address = window.tronWeb.defaultAddress.base58;
-        console.log("授权后的钱包地址：", address);
-
-        if (address && address !== 'false') {
-          userWallet = address;
-          document.getElementById('status').innerText = "授权成功，钱包地址：" + userWallet;
-        } else {
-          document.getElementById('status').innerText = "授权后仍未获取到钱包地址，请确认钱包已登录";
-        }
-      } catch (err) {
-        console.error("用户拒绝授权或其他错误：", err);
-        alert("钱包授权失败：" + err.message);
-      }
+      // 获取当前钱包地址
+      userWallet = window.tronWeb.defaultAddress.base58;
+      document.getElementById('status').innerText = "检测到钱包地址：" + userWallet;
+      console.log("检测到钱包地址：", userWallet);
     });
 
-    // 2. 绑定钱包地址，发送到后端
+    // 点击按钮绑定钱包
     document.getElementById('bindBtn').addEventListener('click', async () => {
       if (!userWallet) {
-        alert("请先授权钱包");
+        alert("未检测到钱包地址，请确认已登录钱包");
         return;
       }
 
       try {
+        console.log("开始向后端发送请求，钱包地址：", userWallet);
+
         const response = await fetch('http://192.168.0.184:3000/bind-wallet', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            address: userWallet // 注意字段名要和后端一致
+            walletAddress: userWallet,
+            session_id: '123456' // 可以替换为实际的邀请参数
           })
         });
 
         const result = await response.json();
         console.log("后端返回：", result);
 
-        if (result.message === '绑定成功') {
+        if (result.success) {
           alert("绑定成功！");
         } else {
-          alert("绑定失败：" + (result.error || '未知错误'));
+          alert("绑定失败：" + (result.message || '未知错误'));
         }
       } catch (err) {
         console.error("网络错误：", err);
@@ -85,4 +63,3 @@
   </script>
 </body>
 </html>
-
